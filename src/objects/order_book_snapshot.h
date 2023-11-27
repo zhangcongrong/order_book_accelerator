@@ -5,6 +5,8 @@
 #ifndef OBJECTS_ORDER_BOOK_SNAPSHOT_H
 #define OBJECTS_ORDER_BOOK_SNAPSHOT_H
 
+#include <utility>
+
 #include "ticker_data.h"
 #include "top_of_book.h"
 #include "side.h"
@@ -23,7 +25,7 @@ public:
             Books bids_,
             Books asks_
     ) : TickerData(std::move(ticker_), timestamp_, local_timestamp_),
-        bids(std::move(bids_)), // TODO(Leo): check move is ok?
+        bids(std::move(bids_)),
         asks(std::move(asks_)) {}
 
     OrderBookSnapshot(const OrderBookSnapshot &d) :

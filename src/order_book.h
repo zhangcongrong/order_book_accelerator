@@ -5,6 +5,8 @@
 #ifndef ORDER_BOOK_ORDER_BOOK_H
 #define ORDER_BOOK_ORDER_BOOK_H
 
+#include <utility>
+
 #include "./utils/typing.h"
 #include "./objects/order_book_snapshot.h"
 #include "./objects/order_book_update.h"
@@ -16,16 +18,13 @@ using namespace objects;
 class OrderBook {
 public:
     OrderBook(std::string exchange_, std::string symbol_,
-              const Books &bids_,
-              const Books &asks_)
+              Books bids_,
+              Books asks_)
             : exchange(std::move(exchange_)), symbol(std::move(symbol_)),
-              bids(bids_), asks(asks_),
+              bids(std::move(bids_)), asks(std::move(asks_)),
               exchange_ts(0), local_ts(0), initialized(false) {}
 
-    OrderBook(const OrderBookSnapshot &d) :
-            exchange(d.GetExchange()), symbol(d.GetSymbol()),
-            bids{d.bids}, asks{d.asks},
-            exchange_ts(d.GetExchangeTs()), local_ts(d.GetLocalTs()), initialized(false) {}
+    explicit OrderBook(const OrderBookSnapshot &d);
 
     inline Ticker Key() const {
         return std::make_pair(exchange, symbol);
@@ -41,7 +40,6 @@ public:
         asks = asks_;
         initialized = true;
     }
-
 
     inline bool IsValid() const {
         return initialized && !bids.empty() && !asks.empty();
@@ -86,8 +84,10 @@ public:
     }
 
     void UpdateCumulativeLevels(size_t levels_ = 0) {
-        std::tie(cum_bids, cum_asks) = cumulativeLevels(levels_);
+        std::tie(cum_bids, cum_asks) = CumulativeLevels(levels_);
     }
+
+    std::pair<std::vector<float>, std::vector<float>> CumulativeLevels(size_t levels_ = 0) const;
 
     void ApplyUpdate(const OrderBookUpdate &updates);
 
@@ -95,7 +95,6 @@ public:
     std::pair<float, float> VWAP(float target_quantity, bool is_bid);
 
 private:
-    std::pair<float, float> cumulativeLevels(size_t levels_ = 0) const;
 
     std::pair<LevelBooks, LevelBooks> levels(size_t levels_ = 0) const;
 
@@ -106,8 +105,8 @@ private:
     std::string symbol;
     Books bids;
     Books asks;
-    float cum_bids;
-    float cum_asks;
+    std::vector<float> cum_bids;
+    std::vector<float> cum_asks;
     Timestamp exchange_ts;
     Timestamp local_ts;
     bool initialized;
