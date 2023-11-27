@@ -5,7 +5,7 @@
 #ifndef OBJECTS_ORDER_BOOK_SNAPSHOT_H
 #define OBJECTS_ORDER_BOOK_SNAPSHOT_H
 
-#include <utility>
+//#include <utility>
 
 #include "ticker_data.h"
 #include "top_of_book.h"
